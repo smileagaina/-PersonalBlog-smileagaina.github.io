@@ -63,14 +63,60 @@
     
     
   
-    <h1 class="title"><a href="/2017/09/15/newOne/">I have a dream</a></h1>
+    <h1 class="title"><a href="/2017/09/15/newOne/">负数在计算机中的表示，计算机为什么负数用补码表示?</a></h1>
   
 
   </header>
   
   <div class="entry">
     
-      
+      <p> 问：</p>
+<p>负数在计算机中如何表示？</p>
+<p>举例来说，+8在计算机中表示为二进制的1000，那么-8怎么表示呢？</p>
+<p>很容易想到，可以将一个二进制位（bit）专门规定为符号位，它等于0时就表示正数，等于1时就表示负数。比如，在8位机中，规定每个字节的最高位为符号位。那么，+8就是00001000，而-8则是10001000。</p>
+<p>但是，随便找一本《计算机原理》，都会告诉你，实际上，计算机内部采用2的补码（Two’s Complement）表示负数。</p>
+<p>什么是2的补码？</p>
+<p>它是一种数值的转换方法，要分二步完成：</p>
+<p>第一步，每一个二进制位都取相反值，0变成1，1变成0。比如，00001000的相反值就是11110111。</p>
+<p>第二步，将上一步得到的值加1。11110111就变成11111000。</p>
+<p>所以，00001000的2的补码就是11111000。也就是说，-8在计算机（8位机）中就是用11111000表示。</p>
+<p>不知道你怎么看，反正我觉得很奇怪，为什么要采用这么麻烦的方式表示负数，更直觉的方式难道不好吗？</p>
+<p>昨天，我在一本书里又看到了这个问题，然后就花了一点时间到网上找资料，现在总算彻底搞明白了。</p>
+<p>2的补码的好处</p>
+<p>首先，要明确一点。计算机内部用什么方式表示负数，其实是无所谓的。只要能够保持一一对应的关系，就可以用任意方式表示负数。所以，既然可以任意选择，那么理应选择一种最方便的方式。</p>
+<p>2的补码就是最方便的方式。它的便利体现在，所有的加法运算可以使用同一种电路完成。</p>
+<p>还是以-8作为例子。</p>
+<p>假定有两种表示方法。一种是直觉表示法，即10001000；另一种是2的补码表示法，即11111000。请问哪一种表示法在加法运算中更方便？</p>
+<p>随便写一个计算式，16 + (-8) = ?</p>
+<p>16的二进制表示是 00010000，所以用直觉表示法，加法就要写成：</p>
+<p>　０００１００００<br>＋１０００１０００<br>－－－－－－－－－<br>　１００１１０００</p>
+<p>可以看到，如果按照正常的加法规则，就会得到10011000的结果，转成十进制就是-24。显然，这是错误的答案。也就是说，在这种情况下，正常的加法规则不适用于正数与负数的加法，因此必须制定两套运算规则，一套用于正数加正数，还有一套用于正数加负数。从电路上说，就是必须为加法运算做两种电路。</p>
+<p>现在，再来看2的补码表示法。</p>
+<p>　０００１００００<br>＋１１１１１０００<br>－－－－－－－－－<br>１００００１０００</p>
+<p>可以看到，按照正常的加法规则，得到的结果是100001000。注意，这是一个9位的二进制数。我们已经假定这是一台8位机，因此最高的第9位是一个溢出位，会被自动舍去。所以，结果就变成了00001000，转成十进制正好是8，也就是16 + (-8) 的正确答案。这说明了，2的补码表示法可以将加法运算规则，扩展到整个整数集，从而用一套电路就可以实现全部整数的加法。</p>
+<p>2的补码的本质</p>
+<p>在回答2的补码为什么能正确实现加法运算之前，我们先看看它的本质，也就是那两个步骤的转换方法是怎么来的。</p>
+<p>要将正数转成对应的负数，其实只要用0减去这个数就可以了。比如，-8其实就是0-8。</p>
+<p>已知8的二进制是00001000，-8就可以用下面的式子求出：</p>
+<p>　００００００００<br>－００００１０００<br>－－－－－－－－－</p>
+<p>因为00000000（被减数）小于0000100（减数），所以不够减。请回忆一下小学算术，如果被减数的某一位小于减数，我们怎么办？很简单，问上一位借1就可以了。</p>
+<p>所以，0000000也问上一位借了1，也就是说，被减数其实是100000000，算式也就改写成：</p>
+<p>１００００００００<br>－００００１０００<br>－－－－－－－－－<br>　１１１１１０００</p>
+<p>进一步观察，可以发现100000000 = 11111111 + 1，所以上面的式子可以拆成两个：</p>
+<p>　１１１１１１１１<br>－００００１０００<br>－－－－－－－－－<br>　１１１１０１１１<br>＋０００００００１<br>－－－－－－－－－<br>　１１１１１０００</p>
+<p>2的补码的两个转换步骤就是这么来的。</p>
+<p>为什么正数加法适用于2的补码？</p>
+<p>实际上，我们要证明的是，X-Y或X+(-Y)可以用X加上Y的2的补码完成。</p>
+<p>Y的2的补码等于(11111111-Y)+1。所以，X加上Y的2的补码，就等于：</p>
+<p>X + (11111111-Y) + 1</p>
+<p>我们假定这个算式的结果等于Z，即 Z = X + (11111111-Y) + 1</p>
+<p>接下来，分成两种情况讨论。</p>
+<p>第一种情况，如果X小于Y，那么Z是一个负数。这时，我们就对Z采用2的补码的逆运算，求出它对应的正数绝对值，再在前面加上负号就行了。所以，</p>
+<p>Z = -[11111111-(Z-1)] = -[11111111-(X + (11111111-Y) + 1-1)] = X - Y</p>
+<p>第二种情况，如果X大于Y，这意味着Z肯定大于11111111，但是我们规定了这是8位机，最高的第9位是溢出位，必须被舍去，这相当于减去100000000。所以，</p>
+<p>Z = Z - 100000000 = X + (11111111-Y) + 1 - 100000000 = X - Y</p>
+<p>这就证明了，在正常的加法规则下，可以利用2的补码得到正数与负数相加的正确结果。换言之，计算机只要部署加法电路和补码电路，就可以完成所有整数的加法。</p>
+
     
   </div>
   <footer class="end-sep">
@@ -103,7 +149,7 @@
   
   <div class="entry">
     
-      <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>!<br>I have a dream. 我有一个梦想!!!</p>
+      <p>I have a dream. 我有一个梦想!!!</p>
 <p>正文：</p>
 <h3 id="I-have-a-dream"><a href="#I-have-a-dream" class="headerlink" title="I have a dream"></a>I have a dream</h3><p>I am happy to join with you today in what will go down in history as the greatest demonstration for freedom in the history of our nation.<br>　　Five score years ago, a great American, in whose symbolic shadow we stand today, signed the Emancipation Proclamation. This momentous decree came as a great beacon light of hope to millions of Negro slaves who had been seared in the flames of withering injustice. It came as a joyous daybreak to end the long night of their captivity.<br>　　But one hundred years later, the Negro still is not free. One hundred years later, the life of the Negro is still sadly crippled by the manacles of segregation and the chains of discrimination. One hundred years later, the Negro lives on a lonely island of poverty in the midst of a vast ocean of material prosperity. One hundred years later, the Negro is still languished in the corners of American society and finds himself an exile in his own land. And so we’ve come here today to dramatize a shameful condition.<br>　　In a sense we’ve come to our nation’s capital to cash a check. When the architects of our republic wrote the magnificent words of the Constitution and the Declaration of Independence, they were signing a promissory note to which every American was to fall heir. This note was a promise that all men, yes, black men as well as white men, would be guaranteed the “unalienable Rights” of “Life, Liberty and the pursuit of Happiness.” It is obvious today that America has defaulted on this promissory note, insofar as her citizens of color are concerned. Instead of honoring this sacred obligation, America has given the Negro people a bad check, a check which has come back marked “insufficient funds.”<br>　　But we refuse to believe that the bank of justice is bankrupt. We refuse to believe that there are insufficient funds in the great vaults of opportunity of this nation. And so, we’ve come to cash this check, a check that will give us upon demand the riches of freedom and the security of justice.<br>　　We have also come to this hallowed spot to remind America of the fierce urgency of Now. This is no time to engage in the luxury of cooling off or to take the tranquilizing drug of gradualism. Now is the time to make real the promises of democracy. Now is the time to rise from the dark and desolate valley of segregation to the sunlit path of racial justice. Now is the time to lift our nation from the quicksands of racial injustice to the solid rock of brotherhood. Now is the time to make justice a reality for all of God’s children.<br>　　It would be fatal for the nation to overlook the urgency of the moment. This sweltering summer of the Negro’s legitimate discontent will not pass until there is an invigorating autumn of freedom and equality. Nineteen sixty-three is not an end, but a beginning. And those who hope that the Negro needed to blow off steam and will now be content will have a rude awakening if the nation returns to business as usual. And there will be neither rest nor tranquility in America until the Negro is granted his citizenship rights. The whirlwinds of revolt will continue to shake the foundations of our nation until the bright day of justice emerges.<br>　　But there is something that I must say to my people, who stand on the warm threshold which leads into the palace of justice: In the process of gaining our rightful place, we must not be guilty of wrongful deeds. Let us not seek to satisfy our thirst for freedom by drinking from the cup of bitterness and hatred. We must forever conduct our struggle on the high plane of dignity and discipline. We must not allow our creative protest to degenerate into physical violence. Again and again, we must rise to the majestic heights of meeting physical force with soul force.<br>　　The marvelous new militancy which has engulfed the Negro community must not lead us to a distrust of all white people, for many of our white brothers, as evidenced by their presence here today, have come to realize that their destiny is tied up with our destiny. And they have come to realize that their freedom is inextricably bound to our freedom.<br>　　We cannot walk alone.<br>　　And as we walk, we must make the pledge that we shall always march ahead.<br>　　We cannot turn back.<br>　　There are those who are asking the devotees of civil rights, “When will you be satisfied?” We can never be satisfied as long as the Negro is the victim of the unspeakable horrors of police brutality. We can never be satisfied as long as our bodies, heavy with the fatigue of travel, cannot gain lodging in the motels of the highways and the hotels of the cities. We cannot be satisfied as long as the Negro’s basic mobility is from a smaller ghetto to a larger one. We can never be satisfied as long as our children are stripped of their selfhood and robbed of their dignity by signs stating “for whites only.” We cannot be satisfied as long as a Negro in Mississippi cannot vote and a Negro in New York believes he has nothing for which to vote. No, no, we are not satisfied, and we will not be satisfied until “justice rolls down like waters, and righteousness like a mighty stream.”<br>　　I am not unmindful that some of you have come here out of great trials and tribulations. Some of you have come fresh from narrow jail cells. And some of you have come from areas where your quest – quest for freedom left you battered by the storms of persecution and staggered by the winds of police brutality. You have been the veterans of creative suffering. Continue to work with the faith that unearned suffering is redemptive. Go back to Mississippi, go back to Alabama, go back to South Carolina, go back to Georgia, go back to Louisiana, go back to the slums and ghettos of our northern cities, knowing that somehow this situation can and will be changed.<br>　　Let us not wallow in the valley of despair, I say to you today, my friends.<br>　　And so even though we face the difficulties of today and tomorrow, I still have a dream. It is a dream deeply rooted in the American dream.<br>　　I have a dream that one day this nation will rise up and live out the true meaning of its creed: “We hold these truths to be self-evident, that all men are created equal.”<br>　　I have a dream that one day on the red hills of Georgia, the sons of former slaves and the sons of former slave owners will be able to sit down together at the table of brotherhood.<br>　　I have a dream that one day even the state of Mississippi, a state sweltering with the heat of injustice, sweltering with the heat of oppression, will be transformed into an oasis of freedom and justice.<br>　　I have a dream that my four little children will one day live in a nation where they will not be judged by the color of their skin but by the content of their character.<br>　　I have a dream today!<br>　　I have a dream that one day, down in Alabama, with its vicious racists, with its governor having his lips dripping with the words of “interposition” and “nullification” – one day right there in Alabama little black boys and black girls will be able to join hands with little white boys and white girls as sisters and brothers.<br>　　I have a dream today!<br>　　I have a dream that one day every valley shall be exalted, and every hill and mountain shall be made low, the rough places will be made plain, and the crooked places will be made straight; “and the glory of the Lord shall be revealed and all flesh shall see it together.”?<br>　　This is our hope, and this is the faith that I go back to the South with.<br>　　With this faith, we will be able to hew out of the mountain of despair a stone of hope. With this faith, we will be able to transform the jangling discords of our nation into a beautiful symphony of brotherhood. With this faith, we will be able to work together, to pray together, to struggle together, to go to jail together, to stand up for freedom together, knowing that we will be free one day.<br>　　And this will be the day – this will be the day when all of God’s children will be able to sing with new meaning:<br>　　My country ‘tis of thee, sweet land of liberty, of thee I sing.<br>　　Land where my fathers died, land of the Pilgrim’s pride,<br>　　From every mountainside, let freedom ring!<br>　　And if America is to be a great nation, this must become true.<br>　　And so let freedom ring from the prodigious hilltops of New Hampshire.<br>　　Let freedom ring from the mighty mountains of New York.<br>　　Let freedom ring from the heightening Alleghenies of<br>　　Pennsylvania.<br>　　Let freedom ring from the snow-capped Rockies of Colorado.<br>　　Let freedom ring from the curvaceous slopes of California.<br>　　But not only that:<br>　　Let freedom ring from Stone Mountain of Georgia.<br>　　Let freedom ring from Lookout Mountain of Tennessee.<br>　　Let freedom ring from every hill and molehill of Mississippi.<br>　　From every mountainside, let freedom ring.<br>　　And when this happens, when we allow freedom ring, when we let it ring from every village and every hamlet, from every state and every city, we will be able to speed up that day when all of God’s children, black men and white men, Jews and Gentiles, Protestants and Catholics, will be able to join hands and sing in the words of the old Negro spiritual:<br>　　Free at last! Free at last!<br>　　Thank God Almighty, we are free at last!</p>
 <p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
