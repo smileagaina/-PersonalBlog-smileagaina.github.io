@@ -55,6 +55,459 @@
   <header>
     
       <div class="icon"></div>
+      <a href="/2017/09/18/four/">
+  <time datetime="2017-09-18T13:08:25.000Z">
+    2017-09-18
+  </time>
+</a>
+    
+    
+  
+    <h1 class="title"><a href="/2017/09/18/four/">ES6核心内容</a></h1>
+  
+
+  </header>
+  
+  <div class="entry">
+    
+      <p><a href="https://segmentfault.com/a/1190000004365693" target="_blank" rel="external">https://segmentfault.com/a/1190000004365693</a></p>
+<p>ECMAScript 6（以下简称ES6）是JavaScript语言的下一代标准。因为当前版本的ES6是在2015年发布的，所以又称ECMAScript 2015。</p>
+<p>也就是说，ES6就是ES2015。</p>
+<p>虽然目前并不是所有浏览器都能兼容ES6全部特性，但越来越多的程序员在实际项目当中已经开始使用ES6了。所以就算你现在不打算使用ES6，但为了看懂别人的你也该懂点ES6的语法了…</p>
+<p>在我们正式讲解ES6语法之前，我们得先了解下Babel。<br>Babel</p>
+<p>Babel是一个广泛使用的ES6转码器，可以将ES6代码转为ES5代码，从而在现有环境执行。大家可以选择自己习惯的工具来使用使用Babel，具体过程可直接在Babel官网查看：<br>最常用的ES6特性</p>
+<p>let, const, class, extends, super, arrow functions, template string, destructuring, default, rest arguments<br>这些是ES6最常用的几个语法，基本上学会它们，我们就可以走遍天下都不怕啦！我会用最通俗易懂的语言和例子来讲解它们，保证一看就懂，一学就会。<br>let, const</p>
+<p>这两个的用途与var类似，都是用来声明变量的，但在实际运用中他俩都有各自的特殊用途。<br>首先来看下面这个例子：</p>
+<p>var name = ‘zach’</p>
+<p>while (true) {<br>    var name = ‘obama’<br>    console.log(name)  //obama<br>    break<br>}</p>
+<p>console.log(name)  //obama</p>
+<p>使用var 两次输出都是obama，这是因为ES5只有全局作用域和函数作用域，没有块级作用域，这带来很多不合理的场景。第一种场景就是你现在看到的内层变量覆盖外层变量。而let则实际上为JavaScript新增了块级作用域。用它所声明的变量，只在let命令所在的代码块内有效。</p>
+<p>let name = ‘zach’</p>
+<p>while (true) {<br>    let name = ‘obama’<br>    console.log(name)  //obama<br>    break<br>}</p>
+<p>console.log(name)  //zach</p>
+<p>另外一个var带来的不合理场景就是用来计数的循环变量泄露为全局变量，看下面的例子：</p>
+<p>var a = [];<br>for (var i = 0; i &lt; 10; i++) {<br>  a[i] = function () {<br>    console.log(i);<br>  };<br>}<br>a<a href="">6</a>; // 10</p>
+<p>上面代码中，变量i是var声明的，在全局范围内都有效。所以每一次循环，新的i值都会覆盖旧值，导致最后输出的是最后一轮的i的值。而使用let则不会出现这个问题。</p>
+<p>var a = [];<br>for (let i = 0; i &lt; 10; i++) {<br>  a[i] = function () {<br>    console.log(i);<br>  };<br>}<br>a<a href="">6</a>; // 6</p>
+<p>再来看一个更常见的例子，了解下如果不用ES6，而用闭包如何解决这个问题。</p>
+<p>var clickBoxs = document.querySelectorAll(‘.clickBox’)<br>for (var i = 0; i &lt; clickBoxs.length; i++){<br>    clickBoxs[i].onclick = function(){<br>        console.log(i)<br>    }<br>}</p>
+<p>我们本来希望的是点击不同的clickBox，显示不同的i，但事实是无论我们点击哪个clickBox，输出的都是5。下面我们来看下，如何用闭包搞定它。</p>
+<p>function iteratorFactory(i){<br>    var onclick = function(e){<br>        console.log(i)<br>    }<br>    return onclick;<br>}<br>var clickBoxs = document.querySelectorAll(‘.clickBox’)<br>for (var i = 0; i &lt; clickBoxs.length; i++){<br>    clickBoxs[i].onclick = iteratorFactory(i)<br>}</p>
+<p>const也用来声明变量，但是声明的是常量。一旦声明，常量的值就不能改变。</p>
+<p>const PI = Math.PI</p>
+<p>PI = 23 //Module build failed: SyntaxError: /es6/app.js: “PI” is read-only</p>
+<p>当我们尝试去改变用const声明的常量时，浏览器就会报错。<br>const有一个很好的应用场景，就是当我们引用第三方库的时声明的变量，用const来声明可以避免未来不小心重命名而导致出现bug：</p>
+<p>const monent = require(‘moment’)</p>
+<p>class, extends, super</p>
+<p>这三个特性涉及了ES5中最令人头疼的的几个部分：原型、构造函数，继承…你还在为它们复杂难懂的语法而烦恼吗？你还在为指针到底指向哪里而纠结万分吗？</p>
+<p>有了ES6我们不再烦恼！</p>
+<p>ES6提供了更接近传统语言的写法，引入了Class（类）这个概念。新的class写法让对象原型的写法更加清晰、更像面向对象编程的语法，也更加通俗易懂。</p>
+<p>class Animal {<br>    constructor(){<br>        this.type = ‘animal’<br>    }<br>    says(say){<br>        console.log(this.type + ‘ says ‘ + say)<br>    }<br>}</p>
+<p>let animal = new Animal()<br>animal.says(‘hello’) //animal says hello</p>
+<p>class Cat extends Animal {<br>    constructor(){<br>        super()<br>        this.type = ‘cat’<br>    }<br>}</p>
+<p>let cat = new Cat()<br>cat.says(‘hello’) //cat says hello</p>
+<p>上面代码首先用class定义了一个“类”，可以看到里面有一个constructor方法，这就是构造方法，而this关键字则代表实例对象。简单地说，constructor内定义的方法和属性是实例对象自己的，而constructor外定义的方法和属性则是所有实例对象可以共享的。</p>
+<p>Class之间可以通过extends关键字实现继承，这比ES5的通过修改原型链实现继承，要清晰和方便很多。上面定义了一个Cat类，该类通过extends关键字，继承了Animal类的所有属性和方法。</p>
+<p>super关键字，它指代父类的实例（即父类的this对象）。子类必须在constructor方法中调用super方法，否则新建实例时会报错。这是因为子类没有自己的this对象，而是继承父类的this对象，然后对其进行加工。如果不调用super方法，子类就得不到this对象。</p>
+<p>ES6的继承机制，实质是先创造父类的实例对象this（所以必须先调用super方法），然后再用子类的构造函数修改this。</p>
+<p>P.S 如果你写react的话，就会发现以上三个东西在最新版React中出现得很多。创建的每个component都是一个继承React.Component的类。详见react文档<br>arrow function</p>
+<p>这个恐怕是ES6最最常用的一个新特性了，用它来写function比原来的写法要简洁清晰很多:</p>
+<p>function(i){ return i + 1; } //ES5<br>(i) =&gt; i + 1 //ES6</p>
+<p>简直是简单的不像话对吧…<br>如果方程比较复杂，则需要用{}把代码包起来：</p>
+<p>function(x, y) {<br>    x++;<br>    y–;<br>    return x + y;<br>}<br>(x, y) =&gt; {x++; y–; return x+y}</p>
+<p>除了看上去更简洁以外，arrow function还有一项超级无敌的功能！<br>长期以来，JavaScript语言的this对象一直是一个令人头痛的问题，在对象方法中使用this，必须非常小心。例如：</p>
+<p>class Animal {<br>    constructor(){<br>        this.type = ‘animal’<br>    }<br>    says(say){<br>        setTimeout(function(){<br>            console.log(this.type + ‘ says ‘ + say)<br>        }, 1000)<br>    }<br>}</p>
+<p> var animal = new Animal()<br> animal.says(‘hi’)  //undefined says hi</p>
+<p>运行上面的代码会报错，这是因为setTimeout中的this指向的是全局对象。所以为了让它能够正确的运行，传统的解决方法有两种：</p>
+<pre><code>第一种是将this传给self,再用self来指代this
+
+   says(say){
+       var self = this;
+       setTimeout(function(){
+           console.log(self.type + &apos; says &apos; + say)
+       }, 1000)
+
+2.第二种方法是用bind(this),即
+
+   says(say){
+       setTimeout(function(){
+           console.log(this.type + &apos; says &apos; + say)
+       }.bind(this), 1000)
+
+但现在我们有了箭头函数，就不需要这么麻烦了：
+</code></pre><p>class Animal {<br>    constructor(){<br>        this.type = ‘animal’<br>    }<br>    says(say){<br>        setTimeout( () =&gt; {<br>            console.log(this.type + ‘ says ‘ + say)<br>        }, 1000)<br>    }<br>}<br> var animal = new Animal()<br> animal.says(‘hi’)  //animal says hi</p>
+<p>当我们使用箭头函数时，函数体内的this对象，就是定义时所在的对象，而不是使用时所在的对象。<br>并不是因为箭头函数内部有绑定this的机制，实际原因是箭头函数根本没有自己的this，它的this是继承外面的，因此内部的this就是外层代码块的this。<br>template string</p>
+<p>这个东西也是非常有用，当我们要插入大段的html内容到文档中时，传统的写法非常麻烦，所以之前我们通常会引用一些模板工具库，比如mustache等等。</p>
+<p>大家可以先看下面一段代码：</p>
+<p>$(“#result”).append(<br>  “There are <b>“ + basket.count + “</b> “ +<br>  “items in your basket, “ +<br>  “<em>“ + basket.onSale +<br>  “</em> are on sale!”<br>);</p>
+<p>我们要用一堆的’+’号来连接文本与变量，而使用ES6的新特性模板字符串``后，我们可以直接这么来写：</p>
+<p>$(“#result”).append(<code>There are &lt;b&gt;${basket.count}&lt;/b&gt; items
+   in your basket, &lt;em&gt;${basket.onSale}&lt;/em&gt;
+  are on sale!</code>);</p>
+<p>用反引号（\）来标识起始，用${}`来引用变量，而且所有的空格和缩进都会被保留在输出之中，是不是非常爽？！</p>
+<p>React Router从第1.0.3版开始也使用ES6语法了，比如这个例子：</p>
+<link to="{`/taco/${taco.name}`}">{taco.name}
+
+<p>React Router<br>destructuring</p>
+<p>ES6允许按照一定模式，从数组和对象中提取值，对变量进行赋值，这被称为解构（Destructuring）。</p>
+<p>看下面的例子：</p>
+<p>let cat = ‘ken’<br>let dog = ‘lili’<br>let zoo = {cat: cat, dog: dog}<br>console.log(zoo)  //Object {cat: “ken”, dog: “lili”}</p>
+<p>用ES6完全可以像下面这么写：</p>
+<p>let cat = ‘ken’<br>let dog = ‘lili’<br>let zoo = {cat, dog}<br>console.log(zoo)  //Object {cat: “ken”, dog: “lili”}</p>
+<p>反过来可以这么写：</p>
+<p>let dog = {type: ‘animal’, many: 2}<br>let { type, many} = dog<br>console.log(type, many)   //animal 2</p>
+<p>default, rest</p>
+<p>default很简单，意思就是默认值。大家可以看下面的例子，调用animal()方法时忘了传参数，传统的做法就是加上这一句type = type || ‘cat’ 来指定默认值。</p>
+<p>function animal(type){<br>    type = type || ‘cat’<br>    console.log(type)<br>}<br>animal()</p>
+<p>如果用ES6我们而已直接这么写：</p>
+<p>function animal(type = ‘cat’){<br>    console.log(type)<br>}<br>animal()</p>
+<p>最后一个rest语法也很简单，直接看例子：</p>
+<p>function animals(…types){<br>    console.log(types)<br>}<br>animals(‘cat’, ‘dog’, ‘fish’) //[“cat”, “dog”, “fish”]</p>
+<p>而如果不用ES6的话，我们则得使用ES5的arguments。<br>总结</p>
+<p>以上就是ES6最常用的一些语法，可以说这20%的语法，在ES6的日常使用中占了80%…</p>
+
+    
+  </div>
+  <footer class="end-sep">
+    
+      
+      
+    
+    <div class="clearfix"></div>
+  </footer>
+</article>
+
+
+  
+    <article class="post">
+  <header>
+    
+      <div class="icon"></div>
+      <a href="/2017/09/18/three/">
+  <time datetime="2017-09-18T13:08:11.000Z">
+    2017-09-18
+  </time>
+</a>
+    
+    
+  
+    <h1 class="title"><a href="/2017/09/18/three/">SVG 与canvas的区别</a></h1>
+  
+
+  </header>
+  
+  <div class="entry">
+    
+      <p><a href="http://blog.csdn.net/helloword_chen/article/details/49788309" target="_blank" rel="external">http://blog.csdn.net/helloword_chen/article/details/49788309</a><br>讨论关于canvas和svg的区别。首先canvas是html5提供的新元素<canvas>，而svg存在的历史要比canvas久远，已经有十几年了。svg并不是html5专有的标签，最初svg是用xml技术（超文本扩展语言，可以自定义标签或属性）描述二维图形的语言。在H5中看似canvas与svg很像，但是，他们有巨大的差别。</canvas></p>
+<p>  首先，从它们的功能上来讲，canvas可以看做是一个画布。，其绘制出来的图形为标量图，因此，可以在canvas中引入jpg或png这类格式的图片，在实际开发中，大型的网络游戏都是用canvas画布做出来的，并且canvas的技术现在已经相当的成熟。另外，我们喜欢用canvas来做一些统计用的图表，如柱状图曲线图或饼状图等。而svg，所绘制的图形为矢量图，所以其用法上受到了限制。因为只能绘制矢量图，所以svg中不能引入普通的图片，因为矢量图的不会失真的效果，在项目中我们会用来做一些动态的小图标。但是由于其本质为矢量图，可以被无限放大而不会失真，这很适合被用来做地图，而百度地图就是用svg技术做出来的。</p>
+<p>  另外从技术发面来讲canvas里面绘制的图形不能被引擎抓取，如我们要让canvas里面的一个图片跟随鼠标事件：canvas.onmouseover=function(){}。而svg里面的图形可以被引擎抓取，支持事件的绑定。另外canvas中我们绘制图形通常是通过javascript来实现，svg更多的是通过标签来来实现，如在svg中绘制正矩形形就要用<rect></rect>，这里我们不能用属性style=”width:XXX;height:XXX;”来定义。我再来介绍一个svg的js库：TWO.JS。其中包含two.js和three.js前者用于绘制二维图形，后者用于绘制三维图形。TWO.JS可以支持三种格式，svg（默认）、canvas、和WEBGL。当然也可以在普通div中引入。</p>
+
+    
+  </div>
+  <footer class="end-sep">
+    
+      
+      
+    
+    <div class="clearfix"></div>
+  </footer>
+</article>
+
+
+  
+    <article class="post">
+  <header>
+    
+      <div class="icon"></div>
+      <a href="/2017/09/17/two/">
+  <time datetime="2017-09-17T06:15:03.000Z">
+    2017-09-17
+  </time>
+</a>
+    
+    
+  
+    <h1 class="title"><a href="/2017/09/17/two/">JavaScript中的“use strict”</a></h1>
+  
+
+  </header>
+  
+  <div class="entry">
+    
+      <p><a href="http://www.ruanyifeng.com/blog/2013/01/javascript_strict_mode.html" target="_blank" rel="external">http://www.ruanyifeng.com/blog/2013/01/javascript_strict_mode.html</a></p>
+<p>一、概述</p>
+<p>除了正常运行模式，ECMAscript 5添加了第二种运行模式：”严格模式”（strict mode）。顾名思义，这种模式使得Javascript在更严格的条件下运行。</p>
+<p>设立”严格模式”的目的，主要有以下几个：</p>
+<pre><code>　　- 消除Javascript语法的一些不合理、不严谨之处，减少一些怪异行为;
+
+　　- 消除代码运行的一些不安全之处，保证代码运行的安全；
+
+　　- 提高编译器效率，增加运行速度；
+
+　　- 为未来新版本的Javascript做好铺垫。
+</code></pre><p>“严格模式”体现了Javascript更合理、更安全、更严谨的发展方向，包括IE 10在内的主流浏览器，都已经支持它，许多大项目已经开始全面拥抱它。</p>
+<p>另一方面，同样的代码，在”严格模式”中，可能会有不一样的运行结果；一些在”正常模式”下可以运行的语句，在”严格模式”下将不能运行。掌握这些内容，有助于更细致深入地理解Javascript，让你变成一个更好的程序员。</p>
+<p>本文将对”严格模式”做详细介绍。</p>
+<p>二、进入标志</p>
+<p>进入”严格模式”的标志，是下面这行语句：</p>
+<pre><code>　　&quot;use strict&quot;;
+</code></pre><p>老版本的浏览器会把它当作一行普通字符串，加以忽略。</p>
+<p>三、如何调用</p>
+<p>“严格模式”有两种调用方法，适用于不同的场合。</p>
+<p>3.1 针对整个脚本文件</p>
+<p>将”use strict”放在脚本文件的第一行，则整个脚本都将以”严格模式”运行。如果这行语句不在第一行，则无效，整个脚本以”正常模式”运行。如果不同模式的代码文件合并成一个文件，这一点需要特别注意。</p>
+<p>(严格地说，只要前面不是产生实际运行结果的语句，”use strict”可以不在第一行，比如直接跟在一个空的分号后面。)</p>
+<pre><code>　　&lt;script&gt;
+　　　　&quot;use strict&quot;;
+　　　　console.log(&quot;这是严格模式。&quot;);
+　　&lt;/script&gt;
+
+　　&lt;script&gt;
+　　　　console.log(&quot;这是正常模式。&quot;);kly, it&apos;s almost 2 years ago now. I can admit it now - I run it on my school&apos;s network that has about 50 computers.
+　　&lt;/script&gt;
+</code></pre><p>上面的代码表示，一个网页中依次有两段Javascript代码。前一个script标签是严格模式，后一个不是。</p>
+<p>3.2 针对单个函数</p>
+<p>将”use strict”放在函数体的第一行，则整个函数以”严格模式”运行。</p>
+<pre><code>　　function strict(){
+　　　　&quot;use strict&quot;;
+　　　　return &quot;这是严格模式。&quot;;
+　　}
+
+　　function notStrict() {
+　　　　return &quot;这是正常模式。&quot;;
+　　}
+</code></pre><p>3.3 脚本文件的变通写法</p>
+<p>因为第一种调用方法不利于文件合并，所以更好的做法是，借用第二种方法，将整个脚本文件放在一个立即执行的匿名函数之中。</p>
+<pre><code>　　(function (){
+
+　　　　&quot;use strict&quot;;
+
+　　　　// some code here
+
+　　 })();
+</code></pre><p>四、语法和行为改变</p>
+<p>严格模式对Javascript的语法和行为，都做了一些改变。</p>
+<p>4.1 全局变量显式声明</p>
+<p>在正常模式中，如果一个变量没有声明就赋值，默认是全局变量。严格模式禁止这种用法，全局变量必须显式声明。</p>
+<pre><code>&quot;use strict&quot;;
+
+　　v = 1; // 报错，v未声明
+
+　　for(i = 0; i &lt; 2; i++) { // 报错，i未声明
+　　}
+</code></pre><p>因此，严格模式下，变量都必须先用var命令声明，然后再使用。</p>
+<p>4.2 静态绑定</p>
+<p>Javascript语言的一个特点，就是允许”动态绑定”，即某些属性和方法到底属于哪一个对象，不是在编译时确定的，而是在运行时（runtime）确定的。</p>
+<p>严格模式对动态绑定做了一些限制。某些情况下，只允许静态绑定。也就是说，属性和方法到底归属哪个对象，在编译阶段就确定。这样做有利于编译效率的提高，也使得代码更容易阅读，更少出现意外。</p>
+<p>具体来说，涉及以下几个方面。</p>
+<p>（1）禁止使用with语句</p>
+<p>因为with语句无法在编译时就确定，属性到底归属哪个对象。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　var v = 1;
+
+　　with (o){ // 语法错误
+　　　　v = 2;
+　　}
+</code></pre><p>（2）创设eval作用域</p>
+<p>正常模式下，Javascript语言有两种变量作用域（scope）：全局作用域和函数作用域。严格模式创设了第三种作用域：eval作用域。</p>
+<p>正常模式下，eval语句的作用域，取决于它处于全局作用域，还是处于函数作用域。严格模式下，eval语句本身就是一个作用域，不再能够生成全局变量了，它所生成的变量只能用于eval内部。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　var x = 2;
+
+　　console.info(eval(&quot;var x = 5; x&quot;)); // 5
+
+　　console.info(x); // 2
+</code></pre><p>4.3 增强的安全措施</p>
+<p>（1）禁止this关键字指向全局对象</p>
+<pre><code>　　function f(){
+　　　　return !this;
+　　}
+　　// 返回false，因为&quot;this&quot;指向全局对象，&quot;!this&quot;就是false
+
+　　function f(){
+　　　　&quot;use strict&quot;;
+　　　　return !this;
+　　}
+　　// 返回true，因为严格模式下，this的值为undefined，所以&quot;!this&quot;为true。
+</code></pre><p>因此，使用构造函数时，如果忘了加new，this不再指向全局对象，而是报错。</p>
+<pre><code>　　function f(){
+
+　　　　&quot;use strict&quot;;
+
+　　　　this.a = 1;
+
+　　};
+
+　　f();// 报错，this未定义
+</code></pre><p>（2）禁止在函数内部遍历调用栈</p>
+<pre><code>　　function f1(){
+
+　　　　&quot;use strict&quot;;
+
+　　　　f1.caller; // 报错
+
+　　　　f1.arguments; // 报错
+
+　　}
+
+　　f1();
+</code></pre><p>4.4 禁止删除变量</p>
+<p>严格模式下无法删除变量。只有configurable设置为true的对象属性，才能被删除。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　var x;
+
+　　delete x; // 语法错误
+
+　　var o = Object.create(null, {&apos;x&apos;: {
+　　　　　　value: 1,
+　　　　　　configurable: true
+　　}});
+
+　　delete o.x; // 删除成功
+</code></pre><p>4.5 显式报错</p>
+<p>正常模式下，对一个对象的只读属性进行赋值，不会报错，只会默默地失败。严格模式下，将报错。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　var o = {};
+
+　　Object.defineProperty(o, &quot;v&quot;, { value: 1, writable: false });
+
+　　o.v = 2; // 报错
+</code></pre><p>严格模式下，对一个使用getter方法读取的属性进行赋值，会报错。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　var o = {
+
+　　　　get v() { return 1; }
+
+　　};
+
+　　o.v = 2; // 报错
+</code></pre><p>严格模式下，对禁止扩展的对象添加新属性，会报错。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　var o = {};
+
+　　Object.preventExtensions(o);
+
+　　o.v = 1; // 报错
+</code></pre><p>严格模式下，删除一个不可删除的属性，会报错。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　delete Object.prototype; // 报错
+</code></pre><p>4.6 重名错误</p>
+<p>严格模式新增了一些语法错误。</p>
+<p>（1）对象不能有重名的属性</p>
+<p>正常模式下，如果对象有多个重名属性，最后赋值的那个属性会覆盖前面的值。严格模式下，这属于语法错误。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　var o = {
+　　　　p: 1,
+　　　　p: 2
+　　}; // 语法错误
+</code></pre><p>（2）函数不能有重名的参数</p>
+<p>正常模式下，如果函数有多个重名的参数，可以用arguments[i]读取。严格模式下，这属于语法错误。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　function f(a, a, b) { // 语法错误
+
+　　　　return ;
+
+　　}
+</code></pre><p>4.7 禁止八进制表示法</p>
+<p>正常模式下，整数的第一位如果是0，表示这是八进制数，比如0100等于十进制的64。严格模式禁止这种表示法，整数第一位为0，将报错。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　var n = 0100; // 语法错误
+</code></pre><p>4.8 arguments对象的限制</p>
+<p>arguments是函数的参数对象，严格模式对它的使用做了限制。</p>
+<p>（1）不允许对arguments赋值</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　arguments++; // 语法错误
+
+　　var obj = { set p(arguments) { } }; // 语法错误
+
+　　try { } catch (arguments) { } // 语法错误
+
+　　function arguments() { } // 语法错误
+
+　　var f = new Function(&quot;arguments&quot;, &quot;&apos;use strict&apos;; return 17;&quot;); // 语法错误
+</code></pre><p>（2）arguments不再追踪参数的变化</p>
+<pre><code>　　function f(a) {
+
+　　　　a = 2;
+
+　　　　return [a, arguments[0]];
+
+　　}
+
+　　f(1); // 正常模式为[2,2]
+
+　　function f(a) {
+
+　　　　&quot;use strict&quot;;
+
+　　　　a = 2;
+
+　　　　return [a, arguments[0]];
+
+　　}
+
+　　f(1); // 严格模式为[2,1]
+</code></pre><p>（3）禁止使用arguments.callee</p>
+<p>这意味着，你无法在匿名函数内部调用自身了。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　var f = function() { return arguments.callee; };
+
+　　f(); // 报错
+</code></pre><p>4.9 函数必须声明在顶层</p>
+<p>将来Javascript的新版本会引入”块级作用域”。为了与新版本接轨，严格模式只允许在全局作用域或函数作用域的顶层声明函数。也就是说，不允许在非函数的代码块内声明函数。</p>
+<pre><code>　　&quot;use strict&quot;;
+
+　　if (true) {
+
+　　　　function f() { } // 语法错误
+
+　　}
+
+　　for (var i = 0; i &lt; 5; i++) {
+
+　　　　function f2() { } // 语法错误
+
+　　}
+</code></pre><p>4.10 保留字</p>
+<p>为了向将来Javascript的新版本过渡，严格模式新增了一些保留字：implements, interface, let, package, private, protected, public, static, yield。</p>
+<p>使用这些词作为变量名将会报错。</p>
+<pre><code>　　function package(protected) { // 语法错误
+
+　　　　&quot;use strict&quot;;
+
+　　　　var implements; // 语法错误
+
+　　}
+</code></pre>
+    
+  </div>
+  <footer class="end-sep">
+    
+      
+      
+    
+    <div class="clearfix"></div>
+  </footer>
+</article>
+
+
+  
+    <article class="post">
+  <header>
+    
+      <div class="icon"></div>
       <a href="/2017/09/15/newOne/">
   <time datetime="2017-09-15T01:28:38.000Z">
     2017-09-15
